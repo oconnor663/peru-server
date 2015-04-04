@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import html
 import flask
 
 app = flask.Flask(__name__)
@@ -12,34 +13,28 @@ def hello_world():
     return '''
 <html>
     <body>
-        <form action="submit" enctype="multipart/form-data" method="POST">
-            A: <input type="text" name="A"><br>
-            B: <input type="text" name="B"><br>
+        <form action="submit" method="POST">
+            <textarea name="blob"></textarea><br>
             <input type="submit" value="Submit">
         </form>
-        {}
+            <div style='white-space: pre-wrap; font-family: monospace'>
+{}
+            </div>
     </body>
 </html>
 '''.format(get_blobs())
 
 
 def get_blobs():
-    elements = ""
-    for blob in blobs:
-        elements += "<ul>"
-        for key, val in blob.items():
-            # XXX: XSS
-            elements += "<li>{}: {}</li>".format(key, val)
-        elements += "</ul>"
-    return elements
+    return "".join(
+        "<p>" + html.escape(blob) + "</p>\n"
+        for blob in blobs
+    )
 
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    print("RECEIVED")
-    for key, val in flask.request.values.items():
-        print("  {}: {}", key, val)
-    blobs.append(flask.request.values)
+    blobs.append(flask.request.values['blob'])
     return flask.redirect('/')
 
 
