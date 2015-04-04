@@ -8,33 +8,39 @@ app = flask.Flask(__name__)
 blobs = []
 
 
+def get_blobs():
+    return ''.join('''
+        <p style='white-space: pre-wrap; font-family: monospace'>{}</p>
+        <form action="delete/{}" method="POST">
+            <input type="submit" value="Delete">
+        </form>
+    '''.format(html.escape(blob), i) for i, blob in enumerate(blobs))
+
+
 @app.route('/')
-def hello_world():
+def handle_index():
     return '''
 <html>
     <body>
         <form action="submit" method="POST">
-            <textarea name="blob"></textarea><br>
+            <textarea name="blob" rows="5" cols="80"></textarea><br>
             <input type="submit" value="Submit">
         </form>
-            <div style='white-space: pre-wrap; font-family: monospace'>
 {}
-            </div>
     </body>
 </html>
 '''.format(get_blobs())
 
 
-def get_blobs():
-    return "".join(
-        "<p>" + html.escape(blob) + "</p>\n"
-        for blob in blobs
-    )
-
-
 @app.route('/submit', methods=['POST'])
-def submit():
+def handle_submit():
     blobs.append(flask.request.values['blob'])
+    return flask.redirect('/')
+
+
+@app.route('/delete/<id>', methods=['POST'])
+def handle_delete(id=None):
+    blobs.pop(int(id))
     return flask.redirect('/')
 
 
