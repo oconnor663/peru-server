@@ -23,14 +23,14 @@ def db_connection():
 
 def get_blobs():
     with db_connection() as conn:
-        rows = conn.execute('SELECT blob FROM blobs ORDER BY id').fetchall()
-    blobs = [row[0] for row in rows]
+        rows = conn.execute(
+            'SELECT id, blob FROM blobs ORDER BY id').fetchall()
     return ''.join('''
         <p style='white-space: pre-wrap; font-family: monospace'>{}</p>
         <form action="delete/{}" method="POST">
             <input type="submit" value="Delete">
         </form>
-    '''.format(html.escape(blob), i) for i, blob in enumerate(blobs))
+    '''.format(html.escape(blob), i) for i, blob in rows)
 
 
 @app.route('/')
