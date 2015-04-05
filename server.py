@@ -7,6 +7,8 @@ import sqlite3
 
 import flask
 
+import peru.parser
+
 app = flask.Flask(__name__)
 
 DB_PATH = './peru-server.sqlite3'
@@ -31,6 +33,22 @@ def get_blobs():
     return blobs
 
 
+class ValidationError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+def validate_blob(blob):
+    try:
+        scope, imports = peru.parser.parse_string(blob)
+    except Exception as e:
+        raise ValidationError("Parsing failed.") from e
+    if imports:
+        raise ValidationError("Imports are not allowed.")
+    if len(scope.modules) + len(scope.rules) != 1:
+        raise ValidationError("Must define exactly 1 rule or 1 module.")
+
+
 @app.route('/')
 def handle_index():
     blobs = get_blobs()
@@ -41,6 +59,10 @@ def handle_index():
 @app.route('/submit', methods=['POST'])
 def handle_submit():
     blob = flask.request.values['blob']
+    try:
+        validate_blob(blob)
+    except ValidationError as e:
+        return flask.Response(str(e.message), mimetype='text/plain')
     with db_connection() as conn:
         conn.execute('INSERT INTO blobs (blob) VALUES (?)', [blob])
     return flask.redirect('/')
