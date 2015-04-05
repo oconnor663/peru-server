@@ -1,0 +1,19 @@
+<html>
+  <body>
+    <h1>Peru Server</h1>
+    <p> To use these module definitions, add <a href="{{ url }}">{{ url }}</a> to your
+    own project file as a <strong>curl</strong> module. </p>
+    <h2>Add a new module</h2>
+    <form action="submit" method="POST">
+      <textarea name="blob" rows="5" cols="80"></textarea><br>
+      <input type="submit" value="Submit">
+    </form>
+    <h2>Existing modules</h2>
+    {% for id, blob in blobs.items() %}
+    <p style="white-space: pre-wrap; font-family: monospace">{{ blob }}</p>
+    <form action="delete/{{ id }}" method="POST">
+      <input type="submit" value="Delete">
+    </form>
+    {% endfor %}
+  </body>
+</html>
