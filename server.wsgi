@@ -1,5 +1,10 @@
+import logging
 import os
 import sys
+
+
+# make sure errors go to stderr where they can get logged
+logging.basicConfig(stream=sys.stderr)
 
 peru_server_root = os.path.abspath(os.path.dirname(__file__))
 
